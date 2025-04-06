@@ -46,3 +46,50 @@ val sampleIndexData = listOf(
     )
     // Add more entries if needed
 )
+
+val sampleWatchlistItems = listOf(
+    WatchlistItem(
+        symbol = "AAPL",
+        companyName = "Apple Inc.",
+        percentChange = 2.5f,
+        logoUrl = "https://img.logo.dev/ticker/AAPL?token=pk_czwzG--yTyqlZnf3x1hvLw&retina=true",
+        stockPrices = listOf(
+            StockPricePoint("2024-04-01", 170.0f),
+            StockPricePoint("2024-04-02", 172.3f),
+            StockPricePoint("2024-04-03", 171.8f)
+        )
+    ),
+    WatchlistItem(
+        symbol = "GOOGL",
+        companyName = "Alphabet Inc.",
+        percentChange = -1.2f,
+        logoUrl = "https://img.logo.dev/ticker/GOOGL?token=pk_czwzG--yTyqlZnf3x1hvLw&retina=true",
+        stockPrices = listOf(
+            StockPricePoint("2024-04-01", 2800.5f),
+            StockPricePoint("2024-04-02", 2775.0f),
+            StockPricePoint("2024-04-03", 2781.2f)
+        )
+    ),
+    WatchlistItem(
+        symbol = "MSFT",
+        companyName = "Microsoft Corp.",
+        percentChange = 0.8f,
+        logoUrl = "https://img.logo.dev/ticker/MSFT?token=pk_czwzG--yTyqlZnf3x1hvLw&retina=true",
+        stockPrices = listOf(
+            StockPricePoint("2024-04-01", 310.0f),
+            StockPricePoint("2024-04-02", 315.0f),
+            StockPricePoint("2024-04-03", 312.8f)
+        )
+    ),
+    WatchlistItem(
+        symbol = "TSLA",
+        companyName = "Tesla Inc.",
+        percentChange = 5.3f,
+        logoUrl = "https://img.logo.dev/ticker/TSLA?token=pk_czwzG--yTyqlZnf3x1hvLw&retina=true",
+        stockPrices = listOf(
+            StockPricePoint("2024-04-01", 690.0f),
+            StockPricePoint("2024-04-02", 700.0f),
+            StockPricePoint("2024-04-03", 705.0f)
+        )
+    )
+)

@@ -58,7 +58,9 @@ fun SearchPage(
         snapshotFlow { searchQuery }
             .debounce(1000)
             .collectLatest { updatedString ->
-                viewModel.searchForTicker(updatedString)
+                if(updatedString != "") {
+                    viewModel.searchForTicker(updatedString)
+                }
                 queriedStringAfterDebounce = updatedString
             }
 
@@ -73,53 +75,55 @@ fun SearchPage(
             query = searchQuery,
             { searchQuery = it })
         Text("You searched for: $queriedStringAfterDebounce", color = Color.Gray, fontSize = 8.sp)
-        LazyColumn {
-            items(searchedResults.entries.toList()) { (symbol, name) ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp, horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    AsyncImage(
-                        model = "https://img.logo.dev/ticker/$symbol?token=pk_czwzG--yTyqlZnf3x1hvLw&retina=true",
-                        contentDescription = null,
+        if(queriedStringAfterDebounce!=""){
+            LazyColumn {
+                items(searchedResults.entries.toList()) { (symbol, name) ->
+                    Row(
                         modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape),
-                        placeholder = painterResource(R.drawable.arrow_trending),
-                        error = painterResource(R.drawable.data_icon),
-                        contentScale = ContentScale.Crop
-                    )
-
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    // Symbol + Name
-                    Column(
-                        modifier = Modifier.weight(1f)
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp, horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(
-                            text = symbol,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily(Font(R.font.poppins))
+                        AsyncImage(
+                            model = "https://img.logo.dev/ticker/$symbol?token=pk_czwzG--yTyqlZnf3x1hvLw&retina=true",
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape),
+                            placeholder = painterResource(R.drawable.arrow_trending),
+                            error = painterResource(R.drawable.data_icon),
+                            contentScale = ContentScale.Crop
                         )
-                        Text(
-                            text = name,
-                            fontSize = 14.sp,
-                            color = Color.Gray,
-                            fontFamily = FontFamily(Font(R.font.poppins))
-                        )
-                    }
 
-                    Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(16.dp))
 
-                    Button(
-                        onClick = {
-                            viewModel.insertToWatchList(symbol, name)
+                        // Symbol + Name
+                        Column(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                text = symbol,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily(Font(R.font.poppins))
+                            )
+                            Text(
+                                text = name,
+                                fontSize = 14.sp,
+                                color = Color.Gray,
+                                fontFamily = FontFamily(Font(R.font.poppins))
+                            )
                         }
-                    ) {
-                        Icon(Icons.Default.ShoppingCart, contentDescription = "Add to Watchlist")
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Button(
+                            onClick = {
+                                viewModel.insertToWatchList(symbol, name)
+                            }
+                        ) {
+                            Icon(Icons.Default.ShoppingCart, contentDescription = "Add to Watchlist")
+                        }
                     }
                 }
             }
@@ -136,7 +140,7 @@ fun SearchBar(
         modifier = Modifier.fillMaxWidth(),
         onValueChange = onQueryChanged,
         value = query,
-        label = { Text("Search by Stock Name/Ticker") },
+        label = { Text("Search by Stock Name/Ticker", fontSize = 14.sp) },
         maxLines = 1,
         leadingIcon = {
             Icon(

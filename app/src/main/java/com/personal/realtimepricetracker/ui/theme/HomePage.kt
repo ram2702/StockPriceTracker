@@ -1,25 +1,34 @@
 package com.personal.realtimepricetracker.ui.theme
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.IconButton
+
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -28,12 +37,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -48,21 +61,24 @@ import coil.compose.AsyncImage
 import com.personal.realtimepricetracker.R
 import com.personal.realtimepricetracker.data.model.StockPricePoint
 import com.personal.realtimepricetracker.data.model.WatchlistItem
+import com.personal.realtimepricetracker.data.model.sampleIndexData
+import com.personal.realtimepricetracker.data.model.sampleWatchlistItems
+import com.personal.realtimepricetracker.utils.Utils
 import com.personal.realtimepricetracker.viewmodel.PriceTrackerViewModel
 
 @Composable
 fun HomePage(
     viewModel: PriceTrackerViewModel,
 
-) {
-        Column(
-            Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Top
-        ) {
-            TitleCard()
-            IndexGraphList(viewModel)
-            WatchList(viewModel)
-        }
+    ) {
+    Column(
+        Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Top
+    ) {
+        TitleCard()
+        IndexGraphList(viewModel)
+        WatchList(viewModel)
+    }
 }
 
 @Composable
@@ -70,7 +86,7 @@ fun TitleCard() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, top =8.dp)
+            .padding(start = 16.dp, top = 8.dp)
     ) {
         Icon(
             modifier = Modifier.size(24.dp),
@@ -94,7 +110,7 @@ fun IndexGraphList(viewModel: PriceTrackerViewModel) {
             .fillMaxWidth()
             .padding(start = 8.dp)
     ) {
-        items(indicesData) { item ->
+        items(indicesData.ifEmpty { sampleIndexData }) { item ->
             IndexGraphCard(
                 indexName = item.indexName,
                 companyName = item.companyName,
@@ -119,7 +135,8 @@ fun IndexGraphCard(
         } else 0f
     }
 
-    val trendColor = if (percentChange > 0f) Color(0xFF4CAF50) else Color(0xFFFF5252) // Green or Red
+    val trendColor =
+        if (percentChange > 0f) Color(0xFF4CAF50) else Color(0xFFFF5252) // Green or Red
 
     Card(
         modifier = Modifier
@@ -177,7 +194,7 @@ private fun StockGraphCanvas(
 ) {
     Canvas(
         modifier = Modifier
-            .size(width,height)
+            .size(width, height)
     ) {
         val width = size.width
         val height = size.height
@@ -204,21 +221,76 @@ private fun StockGraphCanvas(
 @Composable
 fun WatchList(viewModel: PriceTrackerViewModel) {
     val watchlistItems by viewModel.watchList.collectAsState()
+    var selectedFilter by remember { mutableIntStateOf(1) } // 1 for Gainers Asc, 2 for Gainers Desc, 3 for Losers Asc, 4 for Losers Desc
+    val sortedWatchlistItems = Utils.sortWatchlistItems(watchlistItems.ifEmpty { sampleWatchlistItems }, selectedFilter)
     Column(modifier = Modifier.fillMaxSize()) {
-        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()){
+        Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically ,modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = "WatchList",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(16.dp)
             )
-            Button(modifier = Modifier.align(Alignment.CenterVertically), colors = ButtonColors(containerColor = Color.Transparent, contentColor = Color.White, disabledContentColor = Color.Gray, disabledContainerColor = Color.Gray), onClick = {}) {
-                Icon(imageVector = Icons.Default.Menu, contentDescription = null)
-                Text("Filter")
+            Row(
+                modifier = Modifier
+                    .padding(0.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(modifier = Modifier.wrapContentSize().defaultMinSize(minWidth = 1.dp, minHeight = 1.dp), colors = ButtonDefaults.buttonColors(
+                    containerColor = if(selectedFilter<=2) Color(0xFF3B4CD5) else Color.Transparent,
+                    disabledContentColor = Color.Transparent
+                ),onClick = {
+                    if(selectedFilter>=2){
+                        selectedFilter-=2
+                    }
+                }, contentPadding = PaddingValues(vertical = 4.dp, horizontal = 4.dp)) {
+                    Text(
+                        modifier = Modifier, text = "Gainers",color = if(selectedFilter<=2) Color.White else MaterialTheme.colorScheme.onBackground
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                Button(modifier = Modifier.wrapContentSize().defaultMinSize(minWidth = 1.dp, minHeight = 1.dp), colors = ButtonDefaults.buttonColors(
+                    containerColor = if(selectedFilter>2) Color(0xFF3B4CD5) else Color.Transparent,
+                    disabledContentColor = Color.Transparent
+                ) ,onClick = { if(selectedFilter<=2){
+                    selectedFilter+=2
+                } }, contentPadding = PaddingValues(vertical = 4.dp, horizontal = 4.dp)) {
+                    Text(
+                        modifier = Modifier.padding(0.dp), text = "Price", color = if(selectedFilter>2) Color.White else MaterialTheme.colorScheme.onBackground
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                IconButton(onClick = { if(selectedFilter%2==0){
+                    selectedFilter--
+                } }, modifier = Modifier.size(24.dp).padding(0.dp)) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowUp,
+                        contentDescription = "Sort by Ascending",
+                        tint = if(selectedFilter%2!=0) Color.White else MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier
+                            .background(if(selectedFilter%2!=0) Color(0xFF3B4CD5) else Color.Transparent, CircleShape)
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                IconButton(onClick = {
+                    if(selectedFilter%2!=0){
+                        selectedFilter++
+                    }
+                }, modifier = Modifier.size(24.dp).padding(0.dp)) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = "Sort by Descending",
+                        tint = if(selectedFilter%2==0) Color.White else MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier
+                            .background(if(selectedFilter%2==0) Color(0xFF3B4CD5) else Color.Transparent, CircleShape)
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
             }
         }
         LazyColumn {
-            items(watchlistItems) { item ->
+            items(sortedWatchlistItems) { item ->
                 WatchlistItemCard(item)
             }
         }
@@ -265,8 +337,8 @@ fun WatchlistItemCard(item: WatchlistItem, modifier: Modifier = Modifier) {
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             // Placeholder graph (can be a real Canvas or Lottie)
-            val graphColor = if(item.percentChange>0)Color.Green else Color.Red
-            StockGraphCanvas(item.stockPrices, trendColor = graphColor,60.dp,30.dp)
+            val graphColor = if (item.percentChange > 0) Color.Green else Color.Red
+            StockGraphCanvas(item.stockPrices, trendColor = graphColor, 60.dp, 30.dp)
 
             Spacer(modifier = Modifier.width(12.dp))
 
