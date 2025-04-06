@@ -1,0 +1,287 @@
+package com.personal.realtimepricetracker.ui.theme
+
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.personal.realtimepricetracker.R
+import com.personal.realtimepricetracker.data.model.StockPricePoint
+import com.personal.realtimepricetracker.data.model.WatchlistItem
+import com.personal.realtimepricetracker.viewmodel.PriceTrackerViewModel
+
+@Composable
+fun HomePage(
+    viewModel: PriceTrackerViewModel,
+
+) {
+        Column(
+            Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Top
+        ) {
+            TitleCard()
+            IndexGraphList(viewModel)
+            WatchList(viewModel)
+        }
+}
+
+@Composable
+fun TitleCard() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, top =8.dp)
+    ) {
+        Icon(
+            modifier = Modifier.size(24.dp),
+            painter = painterResource(R.drawable.arrow_trending),
+            contentDescription = "home"
+        )
+        Text(
+            "StockTracker",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily(Font(R.font.poppins))
+        )
+    }
+}
+
+@Composable
+fun IndexGraphList(viewModel: PriceTrackerViewModel) {
+    val indicesData by viewModel.indexData.collectAsState()
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 8.dp)
+    ) {
+        items(indicesData) { item ->
+            IndexGraphCard(
+                indexName = item.indexName,
+                companyName = item.companyName,
+                stockPrices = item.stockPrices,
+            )
+        }
+    }
+}
+
+@Composable
+fun IndexGraphCard(
+    indexName: String,
+    companyName: String,
+    stockPrices: List<StockPricePoint>,
+) {
+    // Calculate percent change
+    val percentChange = remember(stockPrices) {
+        if (stockPrices.size >= 2) {
+            val first = stockPrices.first().close
+            val last = stockPrices.last().close
+            ((last - first) / first) * 100f
+        } else 0f
+    }
+
+    val trendColor = if (percentChange > 0f) Color(0xFF4CAF50) else Color(0xFFFF5252) // Green or Red
+
+    Card(
+        modifier = Modifier
+            .width(250.dp)
+            .padding(8.dp),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxWidth()
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                AsyncImage(
+                    model = "https://img.logo.dev/ticker/$indexName?token=pk_czwzG--yTyqlZnf3x1hvLw&retina=true",
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp),
+                    placeholder = painterResource(R.drawable.arrow_trending),
+                    error = painterResource(R.drawable.data_icon),
+                    contentScale = ContentScale.Fit
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Column {
+                    Text(indexName, fontWeight = FontWeight.Bold)
+                    Text(companyName, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = String.format("%.2f%%", percentChange),
+                color = trendColor,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // Canvas Graph
+            if (stockPrices.size >= 2) {
+                StockGraphCanvas(stockPrices, trendColor, 200.dp, 50.dp)
+            } else {
+                Text("No data", style = MaterialTheme.typography.bodySmall)
+            }
+        }
+    }
+}
+
+@Composable
+private fun StockGraphCanvas(
+    stockPrices: List<StockPricePoint>,
+    trendColor: Color,
+    width: Dp,
+    height: Dp
+) {
+    Canvas(
+        modifier = Modifier
+            .size(width,height)
+    ) {
+        val width = size.width
+        val height = size.height
+        val max = stockPrices.maxOf { it.close }
+        val min = stockPrices.minOf { it.close }
+        val range = if (max == min) 1f else max - min
+        val xStep = width / (stockPrices.size - 1)
+
+        val path = Path()
+        stockPrices.forEachIndexed { i, point ->
+            val x = i * xStep
+            val y = height - ((point.close - min) / range) * height
+            if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+        }
+
+        drawPath(
+            path = path,
+            color = trendColor,
+            style = Stroke(width = 2.dp.toPx())
+        )
+    }
+}
+
+@Composable
+fun WatchList(viewModel: PriceTrackerViewModel) {
+    val watchlistItems by viewModel.watchList.collectAsState()
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()){
+            Text(
+                text = "WatchList",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(16.dp)
+            )
+            Button(modifier = Modifier.align(Alignment.CenterVertically), colors = ButtonColors(containerColor = Color.Transparent, contentColor = Color.White, disabledContentColor = Color.Gray, disabledContainerColor = Color.Gray), onClick = {}) {
+                Icon(imageVector = Icons.Default.Menu, contentDescription = null)
+                Text("Filter")
+            }
+        }
+        LazyColumn {
+            items(watchlistItems) { item ->
+                WatchlistItemCard(item)
+            }
+        }
+    }
+}
+
+@Composable
+fun WatchlistItemCard(item: WatchlistItem, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            AsyncImage(
+                model = item.logoUrl,
+                contentDescription = "${item.symbol} logo",
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column {
+                Text(
+                    text = item.symbol,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+                Text(
+                    modifier = Modifier.width(100.dp),
+                    text = item.companyName,
+                    fontSize = 13.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color.Gray
+                )
+            }
+        }
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            // Placeholder graph (can be a real Canvas or Lottie)
+            val graphColor = if(item.percentChange>0)Color.Green else Color.Red
+            StockGraphCanvas(item.stockPrices, trendColor = graphColor,60.dp,30.dp)
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = "$${item.stockPrices.last().close}",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp
+                )
+                Text(
+                    text = "${if (item.percentChange >= 0) "+" else ""}${item.percentChange}%",
+                    fontSize = 13.sp,
+                    color = if (item.percentChange >= 0) Color(0xFF4CAF50) else Color.Red
+                )
+            }
+        }
+    }
+}
