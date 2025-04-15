@@ -7,8 +7,27 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface StockApi {
+    @GET("query?function=TIME_SERIES_INTRADAY")
+    suspend fun getIntraDayPrices(
+        @Query("symbol") symbol: String,
+        @Query("interval") interval:String = "5min",
+        @Query("apikey") apiKey: String
+    ): Response<StockResponse>
+
     @GET("query?function=TIME_SERIES_DAILY")
     suspend fun getDailyPrices(
+        @Query("symbol") symbol: String,
+        @Query("apikey") apiKey: String
+    ): Response<StockResponse>
+
+    @GET("query?function=TIME_SERIES_WEEKLY")
+    suspend fun getWeeklyPrices(
+        @Query("symbol") symbol: String,
+        @Query("apikey") apiKey: String
+    ): Response<StockResponse>
+
+    @GET("query?function=TIME_SERIES_WEEKLY")
+    suspend fun getMonthlyPrices(
         @Query("symbol") symbol: String,
         @Query("apikey") apiKey: String
     ): Response<StockResponse>

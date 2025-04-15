@@ -1,6 +1,6 @@
-package com.personal.realtimepricetracker.ui.theme
+package com.personal.realtimepricetracker.ui.composables
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,9 +17,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,17 +40,23 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.personal.realtimepricetracker.R
-import com.personal.realtimepricetracker.viewmodel.PriceTrackerViewModel
+import com.personal.realtimepricetracker.utils.SearchDataIndex
+import com.personal.realtimepricetracker.viewmodel.AuthViewModel
+import com.personal.realtimepricetracker.viewmodel.MainViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 
+@OptIn(FlowPreview::class)
 @Composable
 fun SearchPage(
-    viewModel: PriceTrackerViewModel,
+    viewModel: MainViewModel,
+    authViewModel: AuthViewModel,
     innerPadding: PaddingValues
 ) {
     var searchQuery by remember { mutableStateOf("") }
@@ -68,7 +77,7 @@ fun SearchPage(
 
     Column(
         Modifier
-            .padding(top = innerPadding.calculateTopPadding(), start = 16.dp, end = 16.dp)
+            .padding()
             .fillMaxSize()
     ) {
         SearchBar(
@@ -76,8 +85,12 @@ fun SearchPage(
             { searchQuery = it })
         Text("You searched for: $queriedStringAfterDebounce", color = Color.Gray, fontSize = 8.sp)
         if(queriedStringAfterDebounce!=""){
-            LazyColumn {
-                items(searchedResults.entries.toList()) { (symbol, name) ->
+            LazyColumn(
+                modifier = Modifier.padding(start = 4.dp, end = 4.dp)
+            ) {
+                items(searchedResults) { result ->
+                    val symbol = result[SearchDataIndex.SYMBOL.index]
+                    val name = result[SearchDataIndex.NAME.index]
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -97,18 +110,20 @@ fun SearchPage(
 
                         Spacer(modifier = Modifier.width(16.dp))
 
-                        // Symbol + Name
                         Column(
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = symbol,
+                                text = name,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily(Font(R.font.poppins))
+                                fontFamily = FontFamily(Font(R.font.poppins)),
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+
                             )
                             Text(
-                                text = name,
+                                text = symbol,
                                 fontSize = 14.sp,
                                 color = Color.Gray,
                                 fontFamily = FontFamily(Font(R.font.poppins))
@@ -131,16 +146,24 @@ fun SearchPage(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchBar(
     query: String,
     onQueryChanged: (String) -> Unit
 ) {
-    OutlinedTextField(
+    TextField(
         modifier = Modifier.fillMaxWidth(),
         onValueChange = onQueryChanged,
         value = query,
-        label = { Text("Search by Stock Name/Ticker", fontSize = 14.sp) },
+        colors = TextFieldDefaults.textFieldColors(
+            containerColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Gray,
+            focusedIndicatorColor = Color.Gray,
+            disabledIndicatorColor = Color.Gray,
+            cursorColor = MaterialTheme.colorScheme.onBackground
+        ),
+        placeholder = { Text("Search by Stock Name/Ticker", fontSize = 14.sp) },
         maxLines = 1,
         leadingIcon = {
             Icon(

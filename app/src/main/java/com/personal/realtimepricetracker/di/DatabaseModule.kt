@@ -2,6 +2,7 @@ package com.personal.realtimepricetracker.di
 
 import android.content.Context
 import androidx.room.Room
+import com.personal.realtimepricetracker.data.db.PriceAlertDao
 import com.personal.realtimepricetracker.data.db.WatchListDao
 import com.personal.realtimepricetracker.data.db.WatchListDatabase
 import dagger.Module
@@ -14,15 +15,19 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
-
     @Provides
     @Singleton
     fun dataBaseProvider(@ApplicationContext context: Context): WatchListDatabase {
-        return Room.databaseBuilder(context, WatchListDatabase::class.java, "watchlist_db").build()
+        return Room.databaseBuilder(context, WatchListDatabase::class.java, "watchlist_db").fallbackToDestructiveMigration().build()
     }
 
     @Provides
-    fun daoProvider(database: WatchListDatabase):WatchListDao{
+    fun watchListDaoProvider(database: WatchListDatabase):WatchListDao{
         return database.WishListDao()
+    }
+
+    @Provides
+    fun priceAlertDao(database: WatchListDatabase): PriceAlertDao {
+        return database.PriceAlertDao()
     }
 }

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "599100101238",
+    "project_id": "stockvision-28cc4",
+    "storage_bucket": "stockvision-28cc4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:599100101238:android:b5eab6e6634bebd81a4557",
+        "android_client_info": {
+          "package_name": "com.personal.realtimepricetracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "599100101238-0kd05p6dbs6gch18safcipk2gtn58ad3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.personal.realtimepricetracker",
+            "certificate_hash": "1a6653b869977d67174a68806e334c8607c3a153"
+          }
+        },
+        {
+          "client_id": "599100101238-788sjb801nhjoqm71flvehcb09mg6usk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDG1aRkSlQNzCtmd2E3sC78piX4Q9TYJwc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "599100101238-788sjb801nhjoqm71flvehcb09mg6usk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
