@@ -23,8 +23,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.IconButton
-
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -39,6 +37,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -73,6 +72,7 @@ import com.personal.realtimepricetracker.data.model.StockData
 import com.personal.realtimepricetracker.data.model.StockPricePoint
 import com.personal.realtimepricetracker.data.model.majorGlobalIndices
 import com.personal.realtimepricetracker.data.model.sampleIndexData
+import com.personal.realtimepricetracker.utils.DeleteScenario
 import com.personal.realtimepricetracker.utils.Utils
 import com.personal.realtimepricetracker.utils.Utils.getStockPricePoints
 import com.personal.realtimepricetracker.viewmodel.MainViewModel
@@ -435,7 +435,7 @@ fun WatchList(
 @Composable
 fun WatchlistItemCard(item: StockData, onDetailClick: (StockData) -> Unit, viewModel: MainViewModel) {
     var showDeletePopup by remember { mutableStateOf(false) }
-    if(showDeletePopup) DeletePopup(item,viewModel){showPopup->
+    if(showDeletePopup) DeletePopup(DeleteScenario.DeleteStockFromWatchList(item.companyName,item.ticker), { viewModel.deleteItemFromWatchList(item) }){showPopup->
         showDeletePopup = !showPopup
     }
     Row(
@@ -509,40 +509,55 @@ fun WatchlistItemCard(item: StockData, onDetailClick: (StockData) -> Unit, viewM
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeletePopup(item: StockData, viewModel: MainViewModel, dismissPopup: (Boolean) -> Unit) {
+fun DeletePopup(
+    deleteScenarios: DeleteScenario,
+    onClick: () -> Unit,
+    dismissPopup: (Boolean) -> Unit
+) {
     BasicAlertDialog(
         onDismissRequest = { dismissPopup(true) }
     ) {
         Box(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background, shape = RoundedCornerShape(16.dp))
-                .border(1.dp, MaterialTheme.colorScheme.onBackground, shape = RoundedCornerShape(16.dp))
+                .border(
+                    1.dp,
+                    MaterialTheme.colorScheme.onBackground,
+                    shape = RoundedCornerShape(16.dp)
+                )
                 .fillMaxWidth(0.4f)
                 .fillMaxHeight(0.3f)
                 .padding(16.dp)
         ) {
             Column {
                     Row {
-                    AsyncImage(
-                       model = Utils.getLogoUrlFromTicker(item.ticker),
-                       contentDescription = null,
-                       modifier = Modifier.size(24.dp).clip(CircleShape).align(Alignment.CenterVertically),
-                       placeholder = painterResource(R.drawable.arrow_trending),
-                       error = painterResource(R.drawable.data_icon),
-                       contentScale = ContentScale.Fit
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    if(deleteScenarios is DeleteScenario.DeleteStockFromWatchList) {
+                        AsyncImage(
+                            model = Utils.getLogoUrlFromTicker(deleteScenarios.ticker),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(CircleShape)
+                                .align(Alignment.CenterVertically),
+                            placeholder = painterResource(R.drawable.arrow_trending),
+                            error = painterResource(R.drawable.data_icon),
+                            contentScale = ContentScale.Fit
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
                     Text(
-                       item.companyName,
-                       fontSize = 24.sp,
-                       fontWeight = FontWeight.Bold,
-                       maxLines = 1, textAlign = TextAlign.Center,
-                       overflow = TextOverflow.Ellipsis
+                            deleteScenarios.title,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1, textAlign = TextAlign.Center,
+                            overflow = TextOverflow.Ellipsis
                     )
                }
                 Spacer(Modifier.height(16.dp))
-                Text("Remove stock from your Watchlist?")
-                Spacer(Modifier.height(16.dp))
+
+                Text(deleteScenarios.descriptionString)
+
+                Spacer(Modifier.weight(1f))
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
@@ -551,7 +566,7 @@ fun DeletePopup(item: StockData, viewModel: MainViewModel, dismissPopup: (Boolea
                         Text("Cancel")
                     }
                     Button(onClick = {
-                        viewModel.deleteItemFromWatchList(item)
+                        onClick()
                         dismissPopup(true)
                     }) {
                         Text("Remove")

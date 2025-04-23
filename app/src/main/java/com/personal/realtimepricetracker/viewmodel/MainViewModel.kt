@@ -11,6 +11,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.google.firebase.auth.FirebaseAuth
 import com.personal.realtimepricetracker.data.api.StockApi
+import com.personal.realtimepricetracker.data.db.NotificationEntity
 import com.personal.realtimepricetracker.data.db.PriceAlertEntity
 import com.personal.realtimepricetracker.data.db.WatchListEntity
 import com.personal.realtimepricetracker.data.db.toWorkData
@@ -18,6 +19,7 @@ import com.personal.realtimepricetracker.data.model.DailyData
 import com.personal.realtimepricetracker.data.model.StockData
 import com.personal.realtimepricetracker.data.model.StockResponse
 import com.personal.realtimepricetracker.data.model.majorGlobalIndices
+import com.personal.realtimepricetracker.data.repository.NotificationRepository
 import com.personal.realtimepricetracker.data.repository.PriceAlertRepository
 import com.personal.realtimepricetracker.data.repository.WatchListRepository
 import com.personal.realtimepricetracker.utils.ApiEndPoints
@@ -27,7 +29,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -41,6 +42,7 @@ class MainViewModel @Inject constructor(
     private val stockApi: StockApi,
     private val watchListRepository: WatchListRepository,
     private val priceAlertRepository: PriceAlertRepository,
+    private val notificationRepository: NotificationRepository,
     @ApplicationContext private val applicationContext: Context
 ) : ViewModel() {
     private val tag = MainViewModel::class.java.simpleName
@@ -61,8 +63,14 @@ class MainViewModel @Inject constructor(
     private val _fancyDetails = MutableStateFlow<List<String>>(emptyList())
     val fancyDetails: StateFlow<List<String>> = _fancyDetails
 
-    private val _alertPrices = MutableStateFlow<List<Float>>(emptyList())
-    val alertPrices: StateFlow<List<Float>> = _alertPrices
+    private val _alertPriceForTicker = MutableStateFlow<List<Float>>(emptyList())
+    val alertPriceForTicker: StateFlow<List<Float>> = _alertPriceForTicker
+
+    private val _alertPriceList = MutableStateFlow<List<PriceAlertEntity>>(emptyList())
+    val alertPriceList: StateFlow<List<PriceAlertEntity>> = _alertPriceList
+
+    private val _notificationHistory = MutableStateFlow<List<NotificationEntity>>(emptyList())
+    val notificationHistory: StateFlow<List<NotificationEntity>> = _notificationHistory
 
 
     init {
@@ -334,7 +342,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             val prices = priceAlertRepository.getAlertPricesForTicker(ticker).first()
             Log.d("StockDetail", "from Viewmodel: $prices and ticker: $ticker")
-            _alertPrices.value = prices
+            _alertPriceForTicker.value = prices
         }
     }
 
@@ -343,6 +351,37 @@ class MainViewModel @Inject constructor(
             watchListRepository.deleteItemFromWatchList(item)
         }
         getWatchListItemForUser()
+    }
+
+    fun fetchAllNotifications(userID: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            FirebaseAuth.getInstance().uid?.let {
+               _notificationHistory.value = notificationRepository.getAllNotificationsForUser(userID).first()
+            }
+        }
+    }
+
+    fun deleteNotificationHistory() {
+        viewModelScope.launch(Dispatchers.IO) {
+            notificationRepository.deleteAllNotifications()
+        }
+        fetchAllNotifications(FirebaseAuth.getInstance().uid.toString())
+    }
+
+    fun fetchAllPriceAlerts(userID: String) {
+        viewModelScope.launch(Dispatchers.IO)  {
+            _alertPriceList.value = priceAlertRepository.fetchAllPriceAlerts(userID).first()
+        }
+    }
+
+    fun deletePriceAlert(priceAlert: PriceAlertEntity?, context: Context) {
+        priceAlert?.let {
+            WorkManager.getInstance(context).cancelWorkById(priceAlert.workId)
+            viewModelScope.launch(Dispatchers.IO) { priceAlertRepository.deletePriceAlert(priceAlert) }
+        } ?: run{
+            WorkManager.getInstance(context).cancelAllWork()
+            viewModelScope.launch(Dispatchers.IO) { priceAlertRepository.deleteAllPriceAlerts() }
+        }
     }
 }
 

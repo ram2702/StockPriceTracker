@@ -14,9 +14,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,21 +35,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.personal.realtimepricetracker.viewmodel.AuthViewModel
 
 @Composable
-fun Profile(authViewModel: AuthViewModel, innerPadding: PaddingValues) {
+fun Profile(authViewModel: AuthViewModel, navController: NavHostController) {
     val stockVisionUser by authViewModel.userData.collectAsState()
     // Menu items
     val menuItems = listOf(
+        "Notification History" to Icons.Default.Notifications,
+        "Price Alerts" to Icons.Default.Warning,
+        "Reset User Data" to Icons.Default.Refresh,
+        "Delete Account" to Icons.Default.Delete,
         "Logout" to Icons.Default.ExitToApp,
     )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(innerPadding)
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -68,7 +78,7 @@ fun Profile(authViewModel: AuthViewModel, innerPadding: PaddingValues) {
         Spacer(modifier = Modifier.height(24.dp))
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -78,30 +88,36 @@ fun Profile(authViewModel: AuthViewModel, innerPadding: PaddingValues) {
             val onClick : () -> Unit = {
                 when(label){
                     "Logout" -> authViewModel.logOut()
+                    "Notification History" -> navController.navigate("notificationhistory")
+                    "Price Alerts" -> navController.navigate("pricealerts")
                 }
             }
             ProfileMenuItem(icon = icon, label = label, onClick)
-            HorizontalDivider(modifier = Modifier.weight(1f))
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                thickness = 1.dp
+            )
         }
     }
 }
 
 @Composable
 fun ProfileMenuItem(icon: ImageVector, label: String, onClick: () -> Unit) {
+    val color = if(label=="Delete Account") Color.Red else MaterialTheme.colorScheme.onBackground
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(vertical = 12.dp,horizontal = 24.dp)
+            .padding(vertical = 16.dp,horizontal = 24.dp)
     ) {
         Icon(
             imageVector = icon,
             contentDescription = label,
-            tint = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.size(24.dp)
+            tint = color,
+            modifier = Modifier.size(28.dp)
         )
         Spacer(modifier = Modifier.width(16.dp))
-        Text(label, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodyLarge)
+        Text(label, color = color, style = MaterialTheme.typography.bodyLarge)
     }
 }

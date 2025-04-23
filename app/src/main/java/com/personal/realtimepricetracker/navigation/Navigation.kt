@@ -41,6 +41,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import com.personal.realtimepricetracker.R
 import com.personal.realtimepricetracker.ui.composables.HomePage
+import com.personal.realtimepricetracker.ui.composables.NotificationListScreen
+import com.personal.realtimepricetracker.ui.composables.PriceAlertsScreen
 import com.personal.realtimepricetracker.ui.composables.Profile
 import com.personal.realtimepricetracker.ui.composables.SearchPage
 import com.personal.realtimepricetracker.ui.composables.SignInScreen
@@ -127,13 +129,20 @@ fun NavHostComposable(
                     SearchPage(mainViewModel,authViewModel,innerPadding,context)
                 }
                 composable("profile") {
-                    Profile(authViewModel,innerPadding)
+                    Profile(authViewModel, navHost)
                 }
                 composable("details") {
                     StockDetail(navHost, mainViewModel = mainViewModel, context)
                 }
                 composable("predictor") {
                     StockPredictor()
+                }
+                composable("notificationhistory") {
+                    mainViewModel.fetchAllNotifications(userId)
+                    NotificationListScreen(navHost,mainViewModel,userId)
+                }
+                composable("pricealerts") {
+                    PriceAlertsScreen(context,navHost,mainViewModel,userId)
                 }
             }
             if (authResult is AuthResult.Loading) {

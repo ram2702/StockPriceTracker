@@ -63,9 +63,6 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.personal.realtimepricetracker.data.model.StockPricePoint
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
@@ -75,13 +72,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import com.personal.realtimepricetracker.R
 import com.personal.realtimepricetracker.data.db.PriceAlertEntity
 import com.personal.realtimepricetracker.data.model.StockData
+import com.personal.realtimepricetracker.data.model.StockPricePoint
 import com.personal.realtimepricetracker.utils.ApiEndPoints
 import com.personal.realtimepricetracker.utils.SearchDataIndex
 import com.personal.realtimepricetracker.utils.Utils
@@ -207,7 +206,7 @@ fun StockDetail(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ShowPopup(context: Context,stockData: StockData,mainViewModel: MainViewModel, dismissPopup: (Boolean) -> Unit) {
+fun ShowPopup(context: Context, stockData: StockData, mainViewModel: MainViewModel, dismissPopup: (Boolean) -> Unit) {
     var priceAlert by remember { mutableStateOf("") }
     var frequencyType by remember { mutableStateOf("Once") }
     val stockCurrentPrice = stockData.stockPrices.values.last().close
@@ -215,7 +214,7 @@ private fun ShowPopup(context: Context,stockData: StockData,mainViewModel: MainV
     LaunchedEffect(Unit) {
         mainViewModel.fetchAlertPrices(stockData.ticker)
     }
-    val alertPrices by mainViewModel.alertPrices.collectAsState()
+    val alertPrices by mainViewModel.alertPriceForTicker.collectAsState()
     Log.d("StockDetail", "from Popup $alertPrices")
     BasicAlertDialog(onDismissRequest = { dismissPopup(true) }
     ) {

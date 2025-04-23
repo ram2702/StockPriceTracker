@@ -16,10 +16,22 @@ class PriceAlertRepository @Inject constructor(
     }
 
     fun deleteByWorkID(uuid: UUID){
-        priceAlertDao.deletePriceAlert(uuid)
+        priceAlertDao.deletePriceAlertByWorkID(uuid)
     }
 
     fun getAlertPricesForTicker(ticker: String): Flow<List<Float>> {
         return priceAlertDao.getPriceAlertsForTicker(ticker)
+    }
+
+    fun fetchAllPriceAlerts(userID: String): Flow<List<PriceAlertEntity>> {
+        return priceAlertDao.getAllPriceAlertsForUser(userID)
+    }
+
+    fun deletePriceAlert(priceAlert: PriceAlertEntity) {
+        priceAlertDao.deletePriceAlert(priceAlert)
+    }
+
+    fun deleteAllPriceAlerts() {
+        priceAlertDao.deleteAllPriceAlerts()
     }
 }
