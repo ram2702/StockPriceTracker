@@ -137,7 +137,7 @@ class AuthViewModel @Inject constructor(
                     val firebaseUser = FirebaseAuth.getInstance().currentUser
                     val stockVisionUserData = firebaseUser?.let { user ->
                         StockVisionUser(
-                            userName = user.displayName.toString(),
+                            username = user.displayName.toString(),
                             email = user.email.toString(),
                             imageUrl = user.photoUrl.toString()
                         )
@@ -148,6 +148,7 @@ class AuthViewModel @Inject constructor(
                 }
                 else if(documentSnapshot?.exists() == true) {
                     documentSnapshot.toObject(StockVisionUser::class.java)?.let {
+                        Log.d(TAG,"USERdATA of ${FirebaseAuth.getInstance().uid.toString()} $it")
                         _userData.value = it
                     }
                 }

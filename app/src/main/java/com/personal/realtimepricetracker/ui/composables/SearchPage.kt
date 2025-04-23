@@ -1,6 +1,9 @@
 package com.personal.realtimepricetracker.ui.composables
 
-import androidx.compose.foundation.border
+import android.content.Context
+import android.util.Log
+import android.widget.Toast
+import androidx.collection.mutableIntListOf
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,8 +15,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
@@ -27,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,11 +63,20 @@ import kotlinx.coroutines.flow.debounce
 fun SearchPage(
     viewModel: MainViewModel,
     authViewModel: AuthViewModel,
-    innerPadding: PaddingValues
+    innerPadding: PaddingValues,
+    context: Context
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var queriedStringAfterDebounce by remember { mutableStateOf("") }
     val searchedResults by viewModel.searchResults.collectAsState()
+    val iconToAdd = remember { mutableStateListOf<Int>() }
+
+    LaunchedEffect(searchedResults) {
+        iconToAdd.clear()
+        Log.d("SearchPage", "searchedResultCount: ${searchedResults.size}")
+        repeat(searchedResults.size){iconToAdd.add(0)}
+    }
+
     //Debounce Mechanism
     LaunchedEffect(searchQuery) {
         snapshotFlow { searchQuery }
@@ -88,59 +103,62 @@ fun SearchPage(
             LazyColumn(
                 modifier = Modifier.padding(start = 4.dp, end = 4.dp)
             ) {
-                items(searchedResults) { result ->
-                    val symbol = result[SearchDataIndex.SYMBOL.index]
-                    val name = result[SearchDataIndex.NAME.index]
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp, horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        AsyncImage(
-                            model = "https://img.logo.dev/ticker/$symbol?token=pk_czwzG--yTyqlZnf3x1hvLw&retina=true",
-                            contentDescription = null,
+                if(searchedResults.isNotEmpty())
+                    itemsIndexed(searchedResults) { index,result ->
+                        val symbol = result[SearchDataIndex.SYMBOL.index]
+                        val name = result[SearchDataIndex.NAME.index]
+                        Row(
                             modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape),
-                            placeholder = painterResource(R.drawable.arrow_trending),
-                            error = painterResource(R.drawable.data_icon),
-                            contentScale = ContentScale.Crop
-                        )
-
-                        Spacer(modifier = Modifier.width(16.dp))
-
-                        Column(
-                            modifier = Modifier.weight(1f)
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp, horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(
-                                text = name,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily(Font(R.font.poppins)),
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-
+                            AsyncImage(
+                                model = "https://img.logo.dev/ticker/$symbol?token=pk_czwzG--yTyqlZnf3x1hvLw&retina=true",
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape),
+                                placeholder = painterResource(R.drawable.arrow_trending),
+                                error = painterResource(R.drawable.data_icon),
+                                contentScale = ContentScale.Crop
                             )
-                            Text(
-                                text = symbol,
-                                fontSize = 14.sp,
-                                color = Color.Gray,
-                                fontFamily = FontFamily(Font(R.font.poppins))
-                            )
-                        }
 
-                        Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(16.dp))
 
-                        Button(
-                            onClick = {
-                                viewModel.insertToWatchList(symbol, name)
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = name,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily(Font(R.font.poppins)),
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+
+                                )
+                                Text(
+                                    text = symbol,
+                                    fontSize = 14.sp,
+                                    color = Color.Gray,
+                                    fontFamily = FontFamily(Font(R.font.poppins))
+                                )
                             }
-                        ) {
-                            Icon(Icons.Default.ShoppingCart, contentDescription = "Add to Watchlist")
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Button(
+                                onClick = {
+                                    viewModel.insertToWatchList(symbol, name)
+                                    iconToAdd[index] = 1
+                                    Toast.makeText(context,"Successfully Added to Watchlist!",Toast.LENGTH_SHORT).show()
+                                }
+                            ) {
+                                Icon(imageVector = if(iconToAdd.getOrNull(index) == 0)Icons.Default.ShoppingCart else Icons.Default.Check, tint = MaterialTheme.colorScheme.onBackground ,contentDescription = "Add to Watchlist")
+                            }
                         }
                     }
-                }
             }
         }
     }

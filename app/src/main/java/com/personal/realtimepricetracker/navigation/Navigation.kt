@@ -45,6 +45,7 @@ import com.personal.realtimepricetracker.ui.composables.Profile
 import com.personal.realtimepricetracker.ui.composables.SearchPage
 import com.personal.realtimepricetracker.ui.composables.SignInScreen
 import com.personal.realtimepricetracker.ui.composables.SignUpScreen
+import com.personal.realtimepricetracker.ui.composables.SplashScreen
 import com.personal.realtimepricetracker.ui.composables.StockDetail
 import com.personal.realtimepricetracker.ui.composables.StockPredictor
 import com.personal.realtimepricetracker.utils.AuthResult
@@ -80,7 +81,6 @@ fun NavHostComposable(
     }
 
     LaunchedEffect(userId) {
-        mainViewModel.getWatchListItemForUser()
         authViewModel.fetchUsername()
     }
 
@@ -104,7 +104,10 @@ fun NavHostComposable(
         modifier = Modifier.fillMaxSize().padding(),
         bottomBar = { if(authResult is AuthResult.Success) SvBottomBar(navHost,authViewModel) }
     ) { innerPadding ->
-            NavHost(navController = navHost, startDestination = "login", modifier = Modifier.padding(innerPadding)){
+            NavHost(navController = navHost, startDestination = "splash", modifier = Modifier.padding(innerPadding)){
+                composable("splash") {
+                    SplashScreen(navHost,authViewModel)
+                }
                 composable("login") {
                     SignInScreen(onSignInClick = signInExecutor ,{
                         authViewModel.setLoading()
@@ -121,7 +124,7 @@ fun NavHostComposable(
                     HomePage(mainViewModel,navHost)
                 }
                 composable("search") {
-                    SearchPage(mainViewModel,authViewModel,innerPadding)
+                    SearchPage(mainViewModel,authViewModel,innerPadding,context)
                 }
                 composable("profile") {
                     Profile(authViewModel,innerPadding)

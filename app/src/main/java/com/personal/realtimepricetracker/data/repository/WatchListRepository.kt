@@ -5,6 +5,7 @@ import com.personal.realtimepricetracker.data.db.WatchListDao
 import com.personal.realtimepricetracker.data.db.WatchListDatabase
 import com.personal.realtimepricetracker.data.db.WatchListEntity
 import com.personal.realtimepricetracker.data.model.DailyData
+import com.personal.realtimepricetracker.data.model.StockData
 import com.personal.realtimepricetracker.data.model.StockPricePoint
 import com.personal.realtimepricetracker.viewmodel.AuthViewModel
 import kotlinx.coroutines.flow.Flow
@@ -29,5 +30,9 @@ class WatchListRepository @Inject constructor(
             )
         )
 
+    }
+
+    fun deleteItemFromWatchList(item: StockData) {
+        watchListDao.deleteItemFromWatchList(item.ticker)
     }
 }

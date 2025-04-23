@@ -13,4 +13,7 @@ interface WatchListDao {
 
     @Query("SELECT * FROM watchlist")
     fun getAllWatchListTickers(): Flow<List<WatchListEntity>>
+
+    @Query("DELETE FROM watchlist WHERE ticker = :ticker")
+    fun deleteItemFromWatchList(ticker: String)
 }

@@ -222,7 +222,7 @@ private fun ShowPopup(context: Context,stockData: StockData,mainViewModel: MainV
         Box(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background, shape = RoundedCornerShape(8.dp))
-                .border(2.dp, Color.Black, shape = RoundedCornerShape(8.dp))
+                .border(2.dp, MaterialTheme.colorScheme.onBackground, shape = RoundedCornerShape(8.dp))
                 .fillMaxWidth(0.9f)
                 .fillMaxHeight(0.4f)
                 .padding(16.dp)

@@ -337,5 +337,12 @@ class MainViewModel @Inject constructor(
             _alertPrices.value = prices
         }
     }
+
+    fun deleteItemFromWatchList(item: StockData) {
+        viewModelScope.launch(Dispatchers.IO) {
+            watchListRepository.deleteItemFromWatchList(item)
+        }
+        getWatchListItemForUser()
+    }
 }
 

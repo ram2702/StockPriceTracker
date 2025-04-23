@@ -59,7 +59,7 @@ fun Profile(authViewModel: AuthViewModel, innerPadding: PaddingValues) {
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = stockVisionUser.userName,
+                text = stockVisionUser.username,
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.titleMedium
             )
