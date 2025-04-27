@@ -57,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
@@ -165,7 +166,7 @@ fun StockDetail(
         }
         Spacer(modifier = Modifier.height(32.dp))
         StockLineGraph(
-            pricePoints = Utils.getStockPricePoints(stockData.stockPrices),
+            pricePoints = Utils.getStockPricePoints(stockData.stockPrices).reversed(),
             lineColor = if (stockData.percentChange >= 0) Color(0xFF029302) else Color.Red,
             dotColor = MaterialTheme.colorScheme.onBackground,
             themeColor = MaterialTheme.colorScheme.onBackground
@@ -221,7 +222,11 @@ fun ShowPopup(context: Context, stockData: StockData, mainViewModel: MainViewMod
         Box(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background, shape = RoundedCornerShape(8.dp))
-                .border(2.dp, MaterialTheme.colorScheme.onBackground, shape = RoundedCornerShape(8.dp))
+                .border(
+                    2.dp,
+                    MaterialTheme.colorScheme.onBackground,
+                    shape = RoundedCornerShape(8.dp)
+                )
                 .fillMaxWidth(0.9f)
                 .fillMaxHeight(0.4f)
                 .padding(16.dp)
@@ -343,7 +348,8 @@ fun StockLineGraph(
     lineColor: Color = Color.Red,
     dotColor: Color = Color.Red,
     dottedLineColor: Color = Color.LightGray,
-    themeColor: Color
+    themeColor: Color,
+    predictedData: Boolean = false
 ) {
     if (pricePoints.isEmpty()) return
     val maxPrice = pricePoints.maxOf { it.close }
@@ -396,7 +402,6 @@ fun StockLineGraph(
             canvasWidth - maxOf(priceTextWidth, dateTextWidth) - xOffset
         )
 
-        // Line path
         val path = Path().apply {
             moveTo(points.first().x, points.first().y)
             for (i in 1 until points.size) {
@@ -404,11 +409,36 @@ fun StockLineGraph(
             }
         }
 
+        // Draw the solid color portion
         drawPath(
             path = path,
             color = lineColor,
             style = Stroke(width = 8f)
         )
+
+        if(predictedData){// Draw the last segment with a gradient if there are at least 2 points
+            if (points.size >= 2) {
+                val lastSegmentPath = Path().apply {
+                    moveTo(
+                        points[points.size - 2].x,
+                        points[points.size - 2].y
+                    ) // Last-but-one point
+                    lineTo(points.last().x, points.last().y) // Last point
+                }
+
+                val gradientBrush = Brush.linearGradient(
+                    colors = listOf(Color.Yellow, lineColor),
+                    start = points[points.size - 2], // Start of gradient at last-but-one point
+                    end = points.last()             // End of gradient at last point
+                )
+
+                drawPath(
+                    path = lastSegmentPath,
+                    brush = gradientBrush,
+                    style = Stroke(width = 8f)
+                )
+            }
+        }
 
         // Current price dot
         val lastPoint = points.last()

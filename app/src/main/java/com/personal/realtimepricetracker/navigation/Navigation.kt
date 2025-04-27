@@ -50,15 +50,18 @@ import com.personal.realtimepricetracker.ui.composables.SignUpScreen
 import com.personal.realtimepricetracker.ui.composables.SplashScreen
 import com.personal.realtimepricetracker.ui.composables.StockDetail
 import com.personal.realtimepricetracker.ui.composables.StockPredictor
+//import com.personal.realtimepricetracker.ui.composables.StockPredictor
 import com.personal.realtimepricetracker.utils.AuthResult
 import com.personal.realtimepricetracker.viewmodel.AuthViewModel
 import com.personal.realtimepricetracker.viewmodel.MainViewModel
+import com.personal.realtimepricetracker.viewmodel.StockPredictionViewModel
 
 @Composable
 fun NavHostComposable(
     navHost: NavHostController,
     mainViewModel: MainViewModel,
     authViewModel: AuthViewModel,
+    stockPredictorViewModel: StockPredictionViewModel,
     context: Context
 ){
     val TAG = "Navigation"
@@ -135,7 +138,7 @@ fun NavHostComposable(
                     StockDetail(navHost, mainViewModel = mainViewModel, context)
                 }
                 composable("predictor") {
-                    StockPredictor()
+                    StockPredictor(stockPredictorViewModel,mainViewModel)
                 }
                 composable("notificationhistory") {
                     mainViewModel.fetchAllNotifications(userId)

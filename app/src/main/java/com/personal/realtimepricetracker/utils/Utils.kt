@@ -50,4 +50,17 @@ object Utils{
         val words = text.trim().split(" ")
         return if (words.isNotEmpty()) words.last() else ""
     }
+
+    fun getNextDate(dateStr: String): String {
+        val formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val date = java.time.LocalDate.parse(dateStr, formatter)
+        val nextDate = date.plusDays(2)
+        return nextDate.format(formatter)
+    }
+
+    fun calculatePercentageChange(oldPrice: Float, newPrice: Float): Float? {
+        if (oldPrice <= 0) return null
+        val change = ((newPrice - oldPrice) / oldPrice) * 100
+        return change
+    }
 }

@@ -31,7 +31,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideStockApi(retrofit: Retrofit): StockApi {
-        return MockApi()
+        return retrofit.create(StockApi::class.java)
     }
 
     @Provides

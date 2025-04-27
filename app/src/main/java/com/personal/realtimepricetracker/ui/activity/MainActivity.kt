@@ -13,6 +13,7 @@ import com.personal.realtimepricetracker.navigation.NavHostComposable
 import com.personal.realtimepricetracker.ui.theme.RealTimePriceTrackerTheme
 import com.personal.realtimepricetracker.viewmodel.AuthViewModel
 import com.personal.realtimepricetracker.viewmodel.MainViewModel
+import com.personal.realtimepricetracker.viewmodel.StockPredictionViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -21,13 +22,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val mainViewModel: MainViewModel by viewModels()
         val authViewModel: AuthViewModel by viewModels()
+        val stockPredictorViewModel: StockPredictionViewModel by viewModels()
         Firebase.initialize(this)
         enableEdgeToEdge()
         setContent {
             Log.d("MainActivity", "ViewModel initialized")
             RealTimePriceTrackerTheme {
                 val navHostController = rememberNavController()
-                NavHostComposable(navHostController, mainViewModel, authViewModel, this@MainActivity)
+                NavHostComposable(navHostController, mainViewModel, authViewModel,stockPredictorViewModel, this@MainActivity)
             }
         }
     }

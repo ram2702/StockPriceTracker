@@ -25,6 +25,15 @@ data class DailyData(
     @SerializedName("5. volume") val volume: Long
 )
 
+data class PredictorFeedData(
+    val date :String,
+    val open: Float,
+    val high: Float,
+    val low: Float,
+    val close: Float,
+    val volume: Long
+)
+
 data class SearchTickerResponse(
     @SerializedName("bestMatches")
     val bestMatches : List<SearchData>
