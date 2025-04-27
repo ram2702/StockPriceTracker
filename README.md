@@ -1,23 +1,43 @@
-# Stock Price Tracker
+# StockVision
+# A modern Android app designed for stock enthusiasts. Seamlessly track real-time stock prices, set customizable alerts, and predict future prices with cutting-edge ML technology!
 
-A modern Android application built using Jetpack Compose that allows users to search for stocks, track price trends, and maintain a watchlist with offline storage support.
+## Features
+# - Firebase Authentication - Provides secure login with Google Sign-On for a personalized experience
+# - WorkManager Alerts - Delivers push notifications to keep users updated on price changes
+# - TFLite LSTM Price Prediction - Leverages machine learning for accurate future price forecasting
+# - Dynamic Watchlist with RoomDB - Offers customizable stock lists with offline storage capabilities
+# - Stock Graph with Canvas - Features interactive price visualization for intuitive analysis
+# - Offline Caching Support - Ensures data access even without an internet connection
 
-Features
-->  Search for stock tickers using company names (Alpha Vantage API).
-->  View historical stock prices with graphical representation.
-->  Add stocks to a persistent watchlist stored locally using Room.
-->  Display real-time company logos using logo.dev.
-->  Debounced search with reactive UI using StateFlow.
-->  Built with Jetpack Compose and MVVM architecture.
-->  Dependency injection via Hilt.
--> Coil for efficient image loading.
+## Screenshots
+### STOCK VISION
+![StockVision](screenshots/StockVision.jpeg)
+### STOCK PREDICTOR
+![Watchlist](screenshots/Predictor.jpeg)
+### SET PRICE ALERT
+![PriceAlert](screenshots/Price_alert.jpeg)
+### PROFILE
+![Profile](screenshots/Profile.jpeg)
+### SEARCH PAGE
+![SearchPage](screenshots/SearchPage.jpeg)
+### STOCK DETAIL
+![StockDetail](screenshots/StockDetail.jpeg)
+### LOG IN
+![Home](screenshots/Homepage.jpeg)
 
-Tech Stack
-Kotlin
-Jetpack Compose
-MVVM Architecture
-Hilt (DI)
-Retrofit & Gson (Networking)
-Room (Local DB)
-StateFlow & LiveData (State Management)
-Coil (Image Loading)
+---
+## Tech Stack
+# - # Android
+#   - Jetpack Compose - Modern UI framework for a sleek, responsive interface
+#   - RoomDB - Robust offline database for persistent data storage
+#   - Coroutines - Efficient asynchronous programming for smooth performance
+# - # Architecture
+#   - MVVM Architecture - Structured design pattern for scalable code organization
+# - # Backend
+#   - Firebase Auth - Secure user authentication with Google Sign-On integration
+# - # ML
+#   - TFLite (LSTM) - Advanced machine learning framework for price predictions
+# - # Utilities
+#   - WorkManager - Manages background tasks like push notifications
+#   - Coil - High-performance image loading library
+#   - Hilt - Dependency injection framework for clean and testable code
