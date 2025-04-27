@@ -122,7 +122,7 @@ fun TitleCard() {
             contentDescription = "home"
         )
         Text(
-            "StockTracker",
+            "StockVision",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily(Font(R.font.poppins))
@@ -160,8 +160,8 @@ fun IndexGraphCard(
     // Calculate percent change
     val percentChange = remember(index.stockPrices) {
         if (index.stockPrices.size >= 2) {
-            val first = index.stockPrices.values.first().close
-            val last = index.stockPrices.values.last().close
+            val first = index.stockPrices.values.last().close
+            val last = index.stockPrices.values.first().close
             ((last - first) / first) * 100f
         } else 0f
     }
@@ -216,7 +216,7 @@ fun IndexGraphCard(
 
             // Canvas Graph
             if (index.stockPrices.size >= 2) {
-                StockGraphCanvas(getStockPricePoints(index.stockPrices), trendColor, 200.dp, 50.dp)
+                StockGraphCanvas(getStockPricePoints(index.stockPrices).reversed(), trendColor, 200.dp, 50.dp)
             } else {
                 Text("No data", style = MaterialTheme.typography.bodySmall)
             }
@@ -487,7 +487,7 @@ fun WatchlistItemCard(item: StockData, onDetailClick: (StockData) -> Unit, viewM
         Row(verticalAlignment = Alignment.CenterVertically) {
             val stockPricePoints: List<StockPricePoint> = getStockPricePoints(item.stockPrices)
             val graphColor = if (item.percentChange > 0) Color.Green else Color.Red
-            StockGraphCanvas(stockPricePoints, trendColor = graphColor, 60.dp, 30.dp)
+            StockGraphCanvas(stockPricePoints.reversed(), trendColor = graphColor, 60.dp, 30.dp)
 
             Spacer(modifier = Modifier.width(12.dp))
 

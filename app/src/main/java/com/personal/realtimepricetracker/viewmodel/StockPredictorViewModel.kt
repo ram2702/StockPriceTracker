@@ -75,7 +75,7 @@ class StockPredictionViewModel @Inject constructor(
                         val predicted = predictor.predictNextPrice(prices)
                         _selectedTickerData.value = listOfStockPricePoints
                         _predictedPrice.value = predicted
-                        _predictedDate.value = getNextDate(prices.last().date)
+                        _predictedDate.value = getNextDate(prices.first().date)
                         _percentageChange.value = calculatePercentageChange(latestPrice, predicted ?: 0f)
                     }
 

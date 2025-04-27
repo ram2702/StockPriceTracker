@@ -208,7 +208,7 @@ class MainViewModel @Inject constructor(
     }
 
     private fun getPercentageChange(timeSeries: Map<String, DailyData>) =
-           (timeSeries.values.last().close - timeSeries.values.first().close) / timeSeries.values.first().close * 100
+           (timeSeries.values.first().close - timeSeries.values.last().close) / timeSeries.values.first().close * 100
 
 
     @SuppressLint("DefaultLocale")

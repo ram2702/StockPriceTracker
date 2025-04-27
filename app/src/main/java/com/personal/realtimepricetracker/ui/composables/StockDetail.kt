@@ -210,7 +210,7 @@ fun StockDetail(
 fun ShowPopup(context: Context, stockData: StockData, mainViewModel: MainViewModel, dismissPopup: (Boolean) -> Unit) {
     var priceAlert by remember { mutableStateOf("") }
     var frequencyType by remember { mutableStateOf("Once") }
-    val stockCurrentPrice = stockData.stockPrices.values.last().close
+    val stockCurrentPrice = stockData.stockPrices.values.first().close
 
     LaunchedEffect(Unit) {
         mainViewModel.fetchAlertPrices(stockData.ticker)
