@@ -9,10 +9,8 @@ A modern Android app designed for stock enthusiasts. Seamlessly track real-time 
 - Stock Graph with Canvas - Features interactive price visualization for intuitive analysis
 - Offline Caching Support - Ensures data access even without an internet connection
 
-## Screenshots
-![StockVision](screenshots/StockVision.jpeg)![Watchlist](screenshots/Predictor.jpeg)![PriceAlert](screenshots/Price_alert.jpeg)![Profile](screenshots/Profile.jpeg)![SearchPage](screenshots/SearchPage.jpeg)![StockDetail](screenshots/StockDetail.jpeg)![Home](screenshots/Homepage.jpeg)
-
 ---
+
 ## Tech Stack
 #### Android
 - Jetpack Compose - Modern UI framework for a sleek, responsive interface
@@ -28,3 +26,8 @@ A modern Android app designed for stock enthusiasts. Seamlessly track real-time 
 - WorkManager - Manages background tasks like push notifications
 - Coil - High-performance image loading library
 - Hilt - Dependency injection framework for clean and testable code
+
+---
+
+## Screenshots
+![StockVision](screenshots/All_Inclusive_screenshot.png)
